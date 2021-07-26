@@ -33,7 +33,7 @@ O sistema evolutivo consiste em inicialmente gerar aleatóriamente uma populaç�
 
 No fim da geração, os melhores indivíduos são selecionados para se reproduzirem, gerando filhos que formarão a próxima geração. Os melhores indivíduos também são mantidos na próxima geração.
 
-#### Fitness
+#### - Fitness
 O desempenho de cada indivíduo é medido por uma função fitness, que possui como parâmetros sua pontuação no jogo e a quantidade de passos dados (que é resetada ao comer uma comida).
 
 A função criada foi:
@@ -42,11 +42,11 @@ fitness = 100 * ((int) _score_^1.5)  +  250 * exp(-((_steps_-300)^2)) / 50000)
 O primeiro termo da função é a pontuação elevada a 1.5 e multiplicada por 100, e o segundo termo é uma gaussiana com centro em 300 e _spread_ de 50000. A movivação da gaussiana foi que os indivíduos precisavam ser recompensados por sobreviverem (desviarem de obstáculos), tendo então um comportamento crescente até 300 passos. Porém, ao se passarem 300 passos sem obter comida, provavelmente o indivíduo está preso em um _loop_, e seu fitness será diminuído. Esse decaimento a partir de 300 passos também ajuda a criar indivíduos mais eficientes em ir atrás da comida.
 O termo relativo à pontuação é exponencial pois as primeiras comidas obtidas não significavam muito como bom desempenho, já que foi observado que muitas cobras obtinham uma ou até duas comidas apenas ao acaso, e morrendo logo em seguida. Desse modo, foi criado um sistema que recompensa exploração e sobrevivência nas primeiras gerações, mas ainda mantendo comida como uma prioridade por ser um fator exponencial.
 
-#### Seleção
+#### - Seleção
 A seleção de melhores indivíduos é feita escolhendo os X melhores indivíduos, onde X é a raiz quadrada da quantidade de indivíduos por geração somada de um. Para cada reprodução, são escolhidos dois indivíduos aleatórios dentre os melhores, formando um filho que entra para a próxima geração.
 
-#### Crossover
+#### - Crossover
 A reprodução é feita utilizando um dos diversos algorítmo de crossover, o crossover por média: o indivíduo filho é gerado realizando uma média de cada peso do pai e da mãe. Porém, nesta implementação foi utilizada uma média ponderada, onde a ponderação é gerada aleatóriamente. Deste modo, cada reprodução pode fazer com que o filho "puxe" mais para o pai, para a mãe, ou um equilíbrio.
 
-#### Mutação
+#### - Mutação
 A mutação foi implementada como uma chance de se somar ou subtrair um fator durante o cálculo de cada peso durante a reprodução. Após realizar a média ponderada para encontrar cada um dos pesos do filho, existe uma chance baixa de ser somado um fator aleatório ao peso, no range (-10,10). Deste modo, seria possível obter pesos com valores acima do range inicial, que também é (-10, 10).
