@@ -1,8 +1,10 @@
 # Evolving snakes
 O projeto se propõe a desenvolver um sistema evolutivo que atualiza os pesos de uma rede neural Multilayer Perceptron, com o objetivo de atingir a maior pontuação possível no jogo _snake_.
 
+
 ## Vídeo explicativo
  - Em desenvolvimento
+
 
 ## Funcionamento
 
