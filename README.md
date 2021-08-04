@@ -4,8 +4,7 @@ O projeto se propõe a desenvolver um sistema evolutivo que atualiza os pesos de
 
 
 ## Vídeo explicativo
- - Em desenvolvimento
-
+ - https://drive.google.com/file/d/1TVKZEUcXsYUw0liysbAioIkJL7dqj0qF/view?usp=sharing
 
 
 ## Funcionamento
@@ -14,19 +13,18 @@ O projeto se propõe a desenvolver um sistema evolutivo que atualiza os pesos de
 As regras do jogo são as mesmas regras conhecidas do famoso jogo _snake_, porém com o diferencial de um fator "fome", onde a cobra não pode ficar mais que uma quantidade de passos sem obter uma comida, se não ela morre. A regra foi criada principalmente para evitar que cobras evoluam para ficar rodando em _loop_ indefinidamente.
 
 ### Snake
-A cobra foi tratada como um robô, onde ela não possui uma visão universal do campo. Os únicos dados que ela possui para interpretar são a distância para um obstáculo (paredes ou o próprio corpo) nas quatro direções principais (cima, baixo, esquerda e direita), e a distância em X e Y para a comida, totalizando 6 variáveis.
+A cobra foi tratada como um robô, onde ela não possui uma visão universal do campo. Os únicos dados que ela possui para interpretar são a distância para um obstáculo (paredes ou o próprio corpo) nas três direções principais (frente, esquerda, e direita), e a distância em X e Y para a comida (em relação à sua direção), totalizando 5 variáveis.
 
 
 ### Rede neural
-A rede neural escolhida foi uma Multilayer Perceptron de duas camadas (desconsiderando os neurônios de entrada, que não tem processamento), consistindo em um hidden layer de 8 neurônios e um layer de saída com 4 neurônios (cada um representando uma direção que a cobra pode ir: cima, baixo, esquerda, e direita). A entrada do sistema serão as 6 variáveis sensoriais da cobra:
-  - Distância até obstáculo em cima
-  - Distância até obstáculo embaixo
-  - Distância até obstáculo na esquerda
-  - Distância até obstáculo na direita
-  - Distância até a comida em X
-  - Distância até a comida em Y
+A rede neural escolhida foi uma Multilayer Perceptron de duas camadas (desconsiderando os neurônios de entrada, que não tem processamento), consistindo em um hidden layer de 8 neurônios e um layer de saída com 3 neurônios (cada um representando uma direção que a cobra pode ir: seguir em frente, virar para esquerda, ou virar para direita). A entrada do sistema serão as 5 variáveis sensoriais da cobra:
+  - Distância até obstáculo em frente
+  - Distância até obstáculo à esquerda
+  - Distância até obstáculo à direita
+  - Distância até a comida em X (sendo X o vetor apontando para a esquerda da cobra)
+  - Distância até a comida em Y (sendo Y o vetor apontando para a direita da cobra)
 
-Com isso, possue-se um total de 80 parâmetros treináveis (48 pesos entre o layer de entrada e o hidden layer, e 32 entre o hidden layer e o layer de saída).
+Com isso, possue-se um total de 64 parâmetros treináveis (40 pesos entre o layer de entrada e o hidden layer, e 24 entre o hidden layer e o layer de saída).
 
 ### Sistema evolutivo
 O sistema evolutivo consiste em inicialmente gerar aleatóriamente uma população de 500 indivíduos, onde cada indivíduo é uma Multilayer Perceptron gerada com pesos aleatórios no range (-10,10). O jogo é controlado por um indivíduo, realizando a operação de _feedforward_ na MultilayerPerceptron pelos sensores da cobra, e utilizando sua saída como a próxima direção da cobra. Ao morrer, passa-se a vez para o próximo indivíduo.
@@ -37,9 +35,9 @@ No fim da geração, os melhores indivíduos são selecionados para se reproduzi
 O desempenho de cada indivíduo é medido por uma função fitness, que possui como parâmetros sua pontuação no jogo e a quantidade de passos dados (que é resetada ao comer uma comida).
 
 A função criada foi:
-fitness = 100 * ((int) _score_^1.5)  +  250 * exp(-((_steps_-300)^2)) / 50000)
+fitness = 200 * ((int) _score_^1.5)  +  100 * exp(-((_steps_-200)^2)) / 25000)
 
-O primeiro termo da função é a pontuação elevada a 1.5 e multiplicada por 100, e o segundo termo é uma gaussiana com centro em 300 e _spread_ de 50000. A movivação da gaussiana foi que os indivíduos precisavam ser recompensados por sobreviverem (desviarem de obstáculos), tendo então um comportamento crescente até 300 passos. Porém, ao se passarem 300 passos sem obter comida, provavelmente o indivíduo está preso em um _loop_, e seu fitness será diminuído. Esse decaimento a partir de 300 passos também ajuda a criar indivíduos mais eficientes em ir atrás da comida.
+O primeiro termo da função é a pontuação elevada a 1.5 e multiplicada por 100, e o segundo termo é uma gaussiana com centro em 200 e _spread_ de 25000. A movivação da gaussiana foi que os indivíduos precisavam ser recompensados por sobreviverem (desviarem de obstáculos), tendo então um comportamento crescente até 300 passos. Porém, ao se passarem 200 passos sem obter comida, provavelmente o indivíduo está preso em um _loop_, e seu fitness será diminuído. Esse decaimento a partir de 300 passos também ajuda a criar indivíduos mais eficientes em ir atrás da comida.
 O termo relativo à pontuação é exponencial pois as primeiras comidas obtidas não significavam muito como bom desempenho, já que foi observado que muitas cobras obtinham uma ou até duas comidas apenas ao acaso, e morrendo logo em seguida. Desse modo, foi criado um sistema que recompensa exploração e sobrevivência nas primeiras gerações, mas ainda mantendo comida como uma prioridade por ser um fator exponencial.
 
 #### - Seleção
