@@ -56,7 +56,7 @@ class GeneticAlgorithm{
     
     // Set sensors array as MLP input
     int control = individual.feed(inputData);
-    this.game.setControl(outputToChar[control]);
+    this.game.setControl(control);
     
     // On game end
     if(this.game.hasEnded()){
@@ -82,11 +82,21 @@ class GeneticAlgorithm{
     }
     print("\n");
     
-    // Add new individuals as mates from bests
-    for(int i = (int) sqrt(this.individualsPerGeneration) + 1; i < lastPopulation.size(); i++){
-      // Get two individuals randomly from the bests
-      MultilayerPerceptron father = lastPopBests.get((int) random(0, lastPopBests.size()));
-      MultilayerPerceptron mother = lastPopBests.get((int) random(0, lastPopBests.size()));
+    // Add mates from best with last popultion
+    for(int i = 0; i < (int) sqrt(this.individualsPerGeneration) + 1; i++){
+      // Get fther as best
+      MultilayerPerceptron father = lastPopBests.get(0);
+      MultilayerPerceptron mother = lastPopulation.get((int) random(0, lastPopulation.size()));
+      
+      // Mate and add child to population
+      newPopulation.add(this.mate(father, mother));
+    }
+    
+    // Add new individuals as mates from bests with last population
+    for(int i = 2 * ((int) sqrt(this.individualsPerGeneration) + 1); i < lastPopulation.size(); i++){
+      // Get father randomly from the bests
+      MultilayerPerceptron father = lastPopBests.get((int) random(1, lastPopBests.size()));
+      MultilayerPerceptron mother = lastPopulation.get((int) random(0, lastPopulation.size()));
       
       // Mate and add child to population
       newPopulation.add(this.mate(father, mother));
@@ -101,7 +111,7 @@ class GeneticAlgorithm{
     // Create individuals and append to population
     for(int i = 0; i < this.individualsPerGeneration; i++){
       // Create random individual
-      population.add(new MultilayerPerceptron(6, new ArrayList<Integer>(Arrays.asList(8, 4))));
+      population.add(new MultilayerPerceptron(5, new ArrayList<Integer>(Arrays.asList(8, 3))));
     }
     
     return population;
@@ -114,7 +124,7 @@ class GeneticAlgorithm{
     
     // Create fitness array
     for(int i = 0; i < pop.size(); i++){
-      fitnessArray.add(pop.get(i).getFitness());  
+      fitnessArray.add(i, pop.get(i).getFitness());  
     }
 
     int bestIndex;
@@ -122,11 +132,12 @@ class GeneticAlgorithm{
     for(int i = 0; i < (int) sqrt(this.individualsPerGeneration) + 1; i++){
       // Get best's index
       bestIndex = fitnessArray.indexOf(Collections.max(fitnessArray));
-      // Remove best to get the next one after this iteration
-      fitnessArray.set(bestIndex, 0);
       
       // Append individual to bests array
       bests.add(pop.get(bestIndex));
+      
+      // Remove best to get the next one after this iteration
+      fitnessArray.set(bestIndex, 0);
     }
     
     return bests;
@@ -134,6 +145,7 @@ class GeneticAlgorithm{
   
   public MultilayerPerceptron mate(MultilayerPerceptron father, MultilayerPerceptron mother){
     ArrayList<ArrayList<ArrayList<Float>>> newWeights = new ArrayList<ArrayList<ArrayList<Float>>>();
+    MultilayerPerceptron donator;
     
     // Chance to inherit neuron input weights from father
     float percentage = random(0,1);
@@ -151,13 +163,19 @@ class GeneticAlgorithm{
           //println(i, j, k);
           percentage = random(0,1);
           
+          if(percentage >= 0.5){
+            donator = father;
+          } else {
+            donator = mother;
+          }
+          
           // Calculate average weight
-          float weight = (father.getWeights().get(i).get(j).get(k) * (percentage)) + (mother.getWeights().get(i).get(j).get(k) * (1-percentage));
-          //float weight = father.getWeights().get(i).get(j).get(k);
+          //float weight = (father.getWeights().get(i).get(j).get(k) * (percentage)) + (mother.getWeights().get(i).get(j).get(k) * (1-percentage));
+          float weight = donator.getWeights().get(i).get(j).get(k);
           
           // Mutation
           if(random(0, 1) < this.mutationRate){
-            weight += random(-3, 3);
+            weight += random(-10, 10);
           }
           
           // Set new weight
@@ -167,7 +185,7 @@ class GeneticAlgorithm{
     }
     
     // Create new individual and set weights
-    MultilayerPerceptron result = new MultilayerPerceptron(6, new ArrayList<Integer>(Arrays.asList(8, 4)));
+    MultilayerPerceptron result = new MultilayerPerceptron(5, new ArrayList<Integer>(Arrays.asList(8, 3)));
     result.setWeights(newWeights);
     
     return result;
@@ -190,7 +208,7 @@ class GeneticAlgorithm{
           
           // Mutation
           if(random(0, 1) < this.mutationRate){
-            weight = +random(-10, 10);
+            weight += random(-10, 10);
           }
           
           // Set new weight
@@ -200,7 +218,7 @@ class GeneticAlgorithm{
     }
     
     // Create new individual and set weights
-    MultilayerPerceptron result = new MultilayerPerceptron(6, new ArrayList<Integer>(Arrays.asList(8, 4)));
+    MultilayerPerceptron result = new MultilayerPerceptron(5, new ArrayList<Integer>(Arrays.asList(8, 3)));
     result.setWeights(newWeights);
     
     return result;
@@ -242,15 +260,15 @@ class GeneticAlgorithm{
           // Generate random death chance
           float deathChance = random(0.1, 0.9);
           int deathCounter = 0;
-           
-          // Iterate individuals
-          for(int i = 0; i < this.population.size(); i++){
+          
+          // Iterate individuals (except last bests)
+          for(int i = (int) sqrt(this.individualsPerGeneration) + 1; i < this.population.size(); i++){
             
             // If individual died
             if(random(0,1) < deathChance){
               
               // Replace by new random
-              this.population.set(i, new MultilayerPerceptron(6, new ArrayList<Integer>(Arrays.asList(8, 4))));
+              this.population.set(i, new MultilayerPerceptron(5, new ArrayList<Integer>(Arrays.asList(8, 3))));
               deathCounter++;
             }
           }
@@ -264,16 +282,16 @@ class GeneticAlgorithm{
   }
   
   public int fitness(Game game){
-    // Gaussian function to calc steps: starts at 0.16 at x=0, get to peak (1) at x=300, and decays rapidly after that (to decrease fitness from snakes stuck in a loop) 
-    float gauss = exp(-pow((game.getTickCounter()-300), 2)/ 50000);
-    float stepsFitness = 250 * gauss;
+    // Gaussian function to calc steps: starts almost at 0, get to peak (1) at x=200, and decays rapidly after that (to decrease fitness from snakes stuck in a loop) 
+    float gauss = exp(-pow((game.getTickCounter()-200), 2)/ 25000);
+    float stepsFitness = 100 * gauss;
     
-    // Exponential function to score: 100 for one food eaten, 850 for two, 1560 for three, etc
-    int foodFitness = 100* ((int) pow(game.getScore(), 1.5));
+    // Exponential function to score
+    int foodFitness = 200* ((int) pow(game.getScore(), 1.5));
     
     
     return foodFitness + (int) stepsFitness;
-    
+    //return game.getScore();
   }
   
   public void draw(){

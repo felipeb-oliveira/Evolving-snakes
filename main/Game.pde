@@ -27,7 +27,7 @@ class Game {
      this.gameTick = tick;
      
      // Max steps before dying
-     this.tickLimit = 700;
+     this.tickLimit = 400;
   }
   
   public void loop(){
@@ -35,6 +35,9 @@ class Game {
     if(keyPressed && this.humanPlayer){
       this.lastKeyPressed = key;
     }
+    
+    // Update game timer
+    gameTimer = millis();
     
     // Check game tick
     if(gameTimer - lastTickTimer > gameTick){
@@ -80,8 +83,9 @@ class Game {
       }
     }
     
-    // Update game timer
-    gameTimer = millis();
+    if(this.humanPlayer){
+      println("MLP input: " + this.getMLPData());
+    }
   }
   
   public Boolean hasEnded() {
@@ -146,9 +150,68 @@ class Game {
     this.tickCounter = 0;
   }
   
-  public void setControl(char control){
-    // Set pressed key
-    this.lastKeyPressed = control;  
+  public void setControl(int control){ 
+    switch(control){
+      // Forward
+      case 0: {
+        // Does nothing
+      } break;
+      
+      // Left
+      case 1: {
+        switch(this.snake.getDirection()){
+          case UP: {
+            // Set pressed key
+            this.lastKeyPressed = 'a';    
+          } break;
+          
+          case LEFT: {
+            // Set pressed key
+            this.lastKeyPressed = 's';    
+          } break;
+          
+          case DOWN: {
+            // Set pressed key
+            this.lastKeyPressed = 'd';    
+          } break;
+          
+          case RIGHT: {
+            // Set pressed key
+            this.lastKeyPressed = 'w';    
+          } break;
+        }
+      } break;
+      
+      // Right
+      case 2: {
+        switch(this.snake.getDirection()){
+          case UP: {
+            // Set pressed key
+            this.lastKeyPressed = 'd';    
+          } break;
+          
+          case LEFT: {
+            // Set pressed key
+            this.lastKeyPressed = 'w';    
+          } break;
+          
+          case DOWN: {
+            // Set pressed key
+            this.lastKeyPressed = 'a';    
+          } break;
+          
+          case RIGHT: {
+            // Set pressed key
+            this.lastKeyPressed = 's';    
+          } break;
+        }
+      } break;
+      
+      // Invalid
+      default: {
+        println("ERROR ERROR ERROR");
+      } break;
+    }
   }
   
   public int getScore(){

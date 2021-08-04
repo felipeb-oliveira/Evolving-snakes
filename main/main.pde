@@ -10,7 +10,7 @@ public enum GameState {
 public GameState state = GameState.GAME_STATE_MENU;
 
 // Game variable
-Game game = new Game(true, 100);
+Game game = new Game(true, 500);
 
 // GA variable
 GeneticAlgorithm geneticAlgorithm;
@@ -35,8 +35,6 @@ void setup() {
   // Init text font
   PFont font = createFont("Arial", 16, true);
   textFont(font);
-  
-  frame.setResizable(true);
 }
 
 void loop() {
@@ -66,10 +64,10 @@ void loop() {
     } 
     break;
 
-  case GAME_STATE_SETTINGS: 
+  case GAME_STATE_SETTINGS:
     {
       // Set genetic algorithm parameters
-      geneticAlgorithm = new GeneticAlgorithm(200, 500, 0.006, 0.02);
+      geneticAlgorithm = new GeneticAlgorithm(200, 500, 0.05, 0.08);
       state = GameState.GAME_STATE_GA;
       
       println("Running generation 0");

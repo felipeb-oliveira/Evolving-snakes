@@ -174,6 +174,10 @@ class Snake{
     }
   }
   
+  public Direction getDirection(){
+    return this.body.get(0).getDirection();  
+  }
+  
   private Boolean checkAlive(){
      int headX = this.body.get(0).getX();
      int headY = this.body.get(0).getY();
@@ -236,6 +240,7 @@ class Snake{
   public ArrayList<Integer> getBodySensorData(){
     // Sensors data (respectively up, left, down, right)
     ArrayList<Integer> obstacleSensor = new ArrayList<Integer>();
+    ArrayList<Integer> output = new ArrayList<Integer>();
     
     for(int i = 0; i < 4; i++){
       obstacleSensor.add(0);  
@@ -260,8 +265,8 @@ class Snake{
     }
     
     // Check body down information
-    for(int i = this.body.get(0).getY()+1; i <= 40; i++){
-      if(this.isOnTile(this.body.get(0).getX(), i) || i == 40){
+    for(int i = this.body.get(0).getY()+1; i < 40; i++){
+      if(this.isOnTile(this.body.get(0).getX(), i) || i == 39){
         // Add distance to body part or wall on sensor array
         obstacleSensor.set(2, i - this.body.get(0).getY());
         break;
@@ -269,26 +274,82 @@ class Snake{
     }
     
     // Check body right information
-    for(int i = this.body.get(0).getX()+1; i <= 40; i++){
-      if(this.isOnTile(i, this.body.get(0).getY()) || i == 40){
+    for(int i = this.body.get(0).getX()+1; i < 40; i++){
+      if(this.isOnTile(i, this.body.get(0).getY()) || i == 39){
         // Add distance to body part or wall on sensor array
         obstacleSensor.set(3, i - this.body.get(0).getX());
         break;
       }
     }
+    
+    // Set output array on order: forward, left, right
+    switch(this.body.get(0).getDirection()){
+      case UP: {
+        output.add(obstacleSensor.get(0));
+        output.add(obstacleSensor.get(1));
+        output.add(obstacleSensor.get(3));
+      } break;
+      
+      case LEFT: {
+        output.add(obstacleSensor.get(1));
+        output.add(obstacleSensor.get(2));
+        output.add(obstacleSensor.get(0));
+      } break;
+      
+      case RIGHT: {
+        output.add(obstacleSensor.get(3));
+        output.add(obstacleSensor.get(0));
+        output.add(obstacleSensor.get(2));
+      } break;
+      
+      case DOWN: {
+        output.add(obstacleSensor.get(2));
+        output.add(obstacleSensor.get(3));
+        output.add(obstacleSensor.get(1));
+      } break;
+    }
 
-    return obstacleSensor;
+    return output;
   }
   
   public ArrayList<Integer> getFoodSensorData(int foodX, int foodY){
     // Sensors data (respectively up, left, down, right)
     ArrayList<Integer> foodSensor = new ArrayList<Integer>();
- 
-    // Store food distance variable
-    foodSensor.add(this.body.get(0).getY() - foodY);
-
-    // Store food distance variable
-    foodSensor.add(this.body.get(0).getX() - foodX);
+    
+    // Set food array
+    switch(this.body.get(0).getDirection()){
+      case UP: {
+        // Side distance
+        foodSensor.add(foodX - this.body.get(0).getX());
+        
+        // Forward distance
+        foodSensor.add(this.body.get(0).getY() - foodY);
+      } break;
+      
+      case LEFT: {
+        // Side distance
+        foodSensor.add(this.body.get(0).getY() - foodY);
+         
+        // Forward distance
+        foodSensor.add(this.body.get(0).getX() - foodX);
+      } break;
+      
+      case RIGHT: {
+        // Side distance
+        foodSensor.add(foodY - this.body.get(0).getY());
+        
+        // Forward distance
+        foodSensor.add(foodX - this.body.get(0).getX());
+      } break;
+      
+      case DOWN: {
+        // Side distance
+        foodSensor.add(this.body.get(0).getX() - foodX);
+        
+        // Forward distance
+        foodSensor.add(foodY - this.body.get(0).getY());
+      } break;
+    }
        
     return foodSensor;
   }
